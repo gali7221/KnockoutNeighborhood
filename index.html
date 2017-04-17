@@ -12,43 +12,24 @@
 
 <div class="container">
 
-	<!-- Search/List Area (desktop) -->
+	<!-- Search/List Area-->
 	<div class="container">
 
-		<!-- Search/List Area (desktop) -->
+		<!-- Search/List Area -->
 		<div class="col-md-3 text-container">
-			<h1>Denver Breweries I've Visited</h1>
+			<h1>Tribeca</h1>
 			<div id="search">
-				<h3>Filter breweries by name or neighborhood:</h3>
-				<form id="brewery-search" class="search-area">
-					<input type="text" name="search-string" id="search-str" class="search-input">
-					<input type="submit" value="search" class="search-btn">
-				</form>
+				<input placeholder="Search.." type="search" data-bind="textInput: query" autocomplete="off">
 			</div>
-			<!-- <ul data-bind="foreach: filteredBreweryList" class="desktop-list">
-				<li data-bind="text: name, click: $parent.breweryClick"></li>
-			</ul> -->
+			<ul data-bind="foreach: filteredLocations" class="desktop-list" autocomplete="off">
+				<li data-bind="text: title, click: $parent.populateInfoWindow"></li>
+			</ul>
 		</div>
 
 		<!-- Google Maps -->
 		<div class="col-md-9 map-container">
 			<div id="google-map" class="main-map"></div>
 		</div>
-
-		<!-- Start of mobile navigation -->
-		<nav class="mobile main-menu">
-			<!-- <ul data-bind="foreach: filteredBreweryList" class="mobile-list">
-				<li data-bind="text: name, click: $parent.breweryClick" class="mobile-item"></li>
-			</ul> -->
-		</nav>
-
-		<!-- <div class="navbar navbar-inverse navbar-fixed-top">
-			<div class="navbar-header pull-right">
-				<a id="nav-expander" class="nav-expander fixed" href="#"><span></span></a>
-			</div>
-		</div> -->
-		<!-- End of mobile navigation -->
-
 	</div>
 
 	<script src="bower_components/jquery/dist/jquery.min.js" charset="utf-8"></script>

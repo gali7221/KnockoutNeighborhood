@@ -1,100 +1,157 @@
-/* ViewModel - JS that defines the data and behavior of your UI*/
-var tribeca = [{
-        title: 'Park Ave Penthouse',
-        lat: 40.7713024,
-        lng: -73.9632393
-    },
-    {
-        title: 'Chelsea Loft',
-        lat: 40.7444883,
-        lng: -73.9949465
-    },
-    {
-        title: 'Union Square Open Floor Plan',
-        lat: 40.7347062,
-        lng: -73.9895759
-    },
-    {
-        title: 'East Village Hip Studio',
-        lat: 40.7281777,
-        lng: -73.984377
-    },
-    {
-        title: 'TriBeCa Artsy Bachelor Pad',
-        lat: 40.7195264,
-        lng: -74.0089934
-    },
-    {
-        title: 'Chinatown Homey Space',
-        lat: 40.7180628,
-        lng: -73.9961237
-    }
-];
-
+// Initialize the map
 var map;
+// initialize the infoWindows
+var infoWindow;
 
-function ViewModel() {
-    // strict mode will prevent the use of undeclared variables
+// Set up the ViewModel
+var ViewModel = function() {
     'use strict';
 
-    // set this to self so you don't lose context!
-    // this is likely when accessing properties from another object
     var self = this;
-    // create ko.observablearray for all items in Model
     self.locations = ko.observableArray([]);
+    // perform live update
+    self.query = ko.observable('');
+    // self.filterLocations = ko.observableArray([]);
 
-    // Initialize the Map
+
+    // Create the google map zoomed in on Denver
     self.initMap = function() {
-        // create a new instance
-        // specify where on the page to load the map - this will be the map div that created
-        self.map = new google.maps.Map(document.getElementById('google-map'), {
-            // offer a lat/lng to the center object literal
-            center: {
-                lat: 40.7413549,
-                lng: -73.9980244
-            },
-            zoom: 12, // how close detail you desire. Range 1 - 21
-            mapTypeControl: false // offers user toggle between different maps: satellite, terrain, etc.
-        });
-
-        self.buildLocations = function() {
-            tribeca.forEach(function(t) {
-                self.locations.push(new Location(t));
-            });
+        var mapCanvas = document.getElementById('google-map');
+        var cenLatLng = new google.maps.LatLng(40.7413549, -73.9980244);
+        var mapOptions = {
+            center: cenLatLng,
+            zoom: 12,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
         };
+        map = new google.maps.Map(mapCanvas, mapOptions);
     };
 
+    // Create the list of brewery locations from the model
+    self.createMarkers = function() {
+        tribeca.forEach(function(location) {
+            self.locations.push(new Location(location));
+            // bounds.extend(marker.position);
+        });
+    };
 
+    // Set up event listener
+    self.openInfoWindow = function() {
+        self.locations().forEach(function(location) {
+            google.maps.event.addListener(location.marker(), 'click', function() {
+                self.populateInfoWindow(location);
+            });
+            // google.maps.event.addListener(location.marker(), 'closeclick', function() {
+            //     infoWindow.setMarker(null);
+            // });
+        });
+    };
+    self.populateInfoWindow = function(marker) {
+        infoWindow = new google.maps.InfoWindow();
+        infoWindow.marker = marker;
+        infoWindow.setContent('<div>' + marker.title() + '</div>');
+        infoWindow.open(map, marker.marker());
+
+
+        map.panTo(new google.maps.LatLng(marker.lat(), marker.lng()));
+    };
+
+    // Search
+    // Filter list
+
+
+    self.filteredLocations = ko.computed(function() {
+        var filter = self.query().toLowerCase();
+        // console.log(filter);
+
+        if (!filter) {
+            return self.locations();
+        } else {
+            return ko.utils.arrayFilter(self.locations(), function(item) {
+                // return item.marker().setMap(map);
+                // item.marker().setVisible(false);
+                // return item.title().toLowerCase().indexOf(filter) !== -1;
+                // return item.marker().setMap(map);
+                if (item.title().toLowerCase().indexOf(filter) !== -1) {
+                    item.marker().setVisible(true);
+                    item.title().toLowerCase().indexOf(filter) !== -1
+                    return true;
+                } else {
+                    item.marker().setVisible(false);
+                    return false;
+                }
+            });
+        }
+    });
+    // self.search = ko.computed(function(value) {
+
+    // self.filterLocations([]);
+    // console.log(self.filterLocations());
+    //
+    // var search = $("#search-str").val();
+    //
+    // self.filterLocations(self.locations().filter(function(location) {
+    //     return location.title().indexOf(search) > -1;
+    // }));
+    // // console.log(self.filterLocations());
+    //
+    // self.locations().forEach(function(location) {
+    //     if (self.filterLocations().indexOf(location) > -1) {
+    //         location.marker().setMap(map);
+    //     } else {
+    //         location.marker().setMap()
+    //     }
+    // });
+
+
+    // console.log(self.filterLocations());
+    // for (var i = 0; i < self.locations().length; i++) {
+    //     var name = self.locations()[i].title().toLowerCase();
+    //
+    //     if (name.indexOf(search) > -1) {
+    //         self.filterLocations.push(self.locations()[i]);
+    //         self.locations()[i].marker().setMap(map);
+    //     } else {
+    //         self.locations()[i].marker().setMap(null);
+    //     }
+    // }
+    // }
 }
 
-// Constructor is responsible for creating new marker objects and placing marker objects on map
+// Constructor to create Tribeca markers
 var Location = function(data) {
+    'use strict';
+
+    // Set all the properties as knockout observables
     var marker;
     this.title = ko.observable(data.title);
     this.lat = ko.observable(data.lat);
     this.lng = ko.observable(data.lng);
 
-    // Google Maps Marker for location
+
+    var bounds = new google.maps.LatLngBounds();
+    // Google Maps Marker for this location
     marker = new google.maps.Marker({
         position: new google.maps.LatLng(this.lat(), this.lng()),
         map: map,
-        title: this.title()
+        title: this.title(),
+        animation: google.maps.Animation.DROP
     });
 
-    // turn marker into an knockout observable
+    // Set the marker as a knockout observable
     this.marker = ko.observable(marker);
-
-}
-
-var viewModel;
+    // bounds.extend(this.marker);
+};
 
 function initialize() {
 
     viewModel = new ViewModel();
 
     viewModel.initMap();
-    viewModel.buildLocations();
-    console.log(self.locations());
+    viewModel.createMarkers();
+    viewModel.openInfoWindow();
+    // viewModel.filterLocations(viewModel.locations());
+    viewModel.filteredLocations();
+
 
     // Activate Knockout
     ko.applyBindings(viewModel);
