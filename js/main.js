@@ -45,10 +45,12 @@ var ViewModel = function() {
             // });
         });
     };
+
     self.populateInfoWindow = function(marker) {
         infoWindow = new google.maps.InfoWindow();
         infoWindow.marker = marker;
-        infoWindow.setContent('<div>' + marker.title() + '</div>');
+        infoWindow.setContent('<div>' + marker.title() + '</div><p id="#foursquare"></p>');
+        self.getFourSquare(marker.lat(), marker.lng());
         infoWindow.open(map, marker.marker());
 
 
@@ -57,8 +59,6 @@ var ViewModel = function() {
 
     // Search
     // Filter list
-
-
     self.filteredLocations = ko.computed(function() {
         var filter = self.query().toLowerCase();
         // console.log(filter);
@@ -82,41 +82,30 @@ var ViewModel = function() {
             });
         }
     });
-    // self.search = ko.computed(function(value) {
 
-    // self.filterLocations([]);
-    // console.log(self.filterLocations());
-    //
-    // var search = $("#search-str").val();
-    //
-    // self.filterLocations(self.locations().filter(function(location) {
-    //     return location.title().indexOf(search) > -1;
-    // }));
-    // // console.log(self.filterLocations());
-    //
-    // self.locations().forEach(function(location) {
-    //     if (self.filterLocations().indexOf(location) > -1) {
-    //         location.marker().setMap(map);
-    //     } else {
-    //         location.marker().setMap()
-    //     }
-    // });
+    self.getFourSquare = function(location1, location2) {
+        var d = new Date();
+        var date = d.getFullYear().toString() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+        var clientId = 'XCPHQKTMT3N2NWZMWG2BCQ40GHHRD0LBBVZRU354ZVMEUZ25';
+        var clientSecret = 'ZC53KE1SVSTOSKR2FPQXIMSGEXC3BVCZTRGBGRUGZZWXLJHE';
+        var url = 'https://api.foursquare.com/v2/venues/search?ll=' + location1 + ',' + location2 + '?&client_id=' + clientId + '&client_secret=' + clientSecret + '&v=' + date;
 
+        // AJAX CALL
+        var settings = {
+            url: url,
+            success: function(results) {
+                four = results.response.venues.name;
+                $('#foursquare').attr('src', four);
+                // var data = {
+                //
+                // }
+            }
+            // var html = template(name);
 
-    // console.log(self.filterLocations());
-    // for (var i = 0; i < self.locations().length; i++) {
-    //     var name = self.locations()[i].title().toLowerCase();
-    //
-    //     if (name.indexOf(search) > -1) {
-    //         self.filterLocations.push(self.locations()[i]);
-    //         self.locations()[i].marker().setMap(map);
-    //     } else {
-    //         self.locations()[i].marker().setMap(null);
-    //     }
-    // }
-    // }
+        }
+        $.ajax(settings);
+    }
 }
-
 // Constructor to create Tribeca markers
 var Location = function(data) {
     'use strict';
@@ -126,6 +115,7 @@ var Location = function(data) {
     this.title = ko.observable(data.title);
     this.lat = ko.observable(data.lat);
     this.lng = ko.observable(data.lng);
+    this.id = ko.observable(data.id);
 
 
     var bounds = new google.maps.LatLngBounds();
