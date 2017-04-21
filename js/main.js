@@ -39,6 +39,7 @@ var ViewModel = function() {
         self.locations().forEach(function(location) {
             google.maps.event.addListener(location.marker(), 'click', function() {
                 self.populateInfoWindow(location);
+                // console.log(location.)
             });
             // google.maps.event.addListener(location.marker(), 'closeclick', function() {
             //     infoWindow.setMarker(null);
@@ -47,12 +48,13 @@ var ViewModel = function() {
     };
 
     self.populateInfoWindow = function(marker) {
-        infoWindow = new google.maps.InfoWindow();
-        infoWindow.marker = marker;
-        infoWindow.setContent('<div>' + marker.title() + '</div><p id="#foursquare"></p>');
+        self.infoWindow = new google.maps.InfoWindow();
+        self.infoWindow.marker = marker;
+        // self.infoWindow.setContent('<div>' + marker.title() + '<p><a id="foursquare"></a></p></div>');
         self.getFourSquare(marker.lat(), marker.lng());
-        infoWindow.open(map, marker.marker());
-
+        // console.log()
+        // self.getFourSquare(marker.lat(), marker.lng());
+        self.infoWindow.open(map, marker.marker());
 
         map.panTo(new google.maps.LatLng(marker.lat(), marker.lng()));
     };
@@ -83,24 +85,30 @@ var ViewModel = function() {
         }
     });
 
-    self.getFourSquare = function(location1, location2) {
+    self.getFourSquare = function(loc1, loc2) {
         var d = new Date();
-        var date = d.getFullYear().toString() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+        // var date = d.getFullYear().toString() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+        var date = '20170420'
         var clientId = 'XCPHQKTMT3N2NWZMWG2BCQ40GHHRD0LBBVZRU354ZVMEUZ25';
         var clientSecret = 'ZC53KE1SVSTOSKR2FPQXIMSGEXC3BVCZTRGBGRUGZZWXLJHE';
-        var url = 'https://api.foursquare.com/v2/venues/search?ll=' + location1 + ',' + location2 + '?&client_id=' + clientId + '&client_secret=' + clientSecret + '&v=' + date;
+        var url = 'https://api.foursquare.com/v2/venues/search?ll=' + loc1 + ',' + loc2 + '&client_id=' + clientId + '&client_secret=' + clientSecret + '&v=' + date;
 
         // AJAX CALL
         var settings = {
             url: url,
             success: function(results) {
-                four = results.response.venues.name;
-                $('#foursquare').attr('src', four);
-                // var data = {
-                //
-                // }
+                var four = results.response.venues[0].url;
+                if (!four) {
+                    four = 'n/a';
+                    self.infoWindow.setContent(four);
+                    return;
+                } else {
+                    self.infoWindow.setContent(four);
+                    return;
+                }
+                // console.log(results.response.venues[0].name)
+                // self.infoWindow.setContent(four);
             }
-            // var html = template(name);
 
         }
         $.ajax(settings);
@@ -139,7 +147,6 @@ function initialize() {
     viewModel.initMap();
     viewModel.createMarkers();
     viewModel.openInfoWindow();
-    // viewModel.filterLocations(viewModel.locations());
     viewModel.filteredLocations();
 
 
