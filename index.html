@@ -24,6 +24,8 @@
 			<ul data-bind="foreach: filteredLocations" class="desktop-list" autocomplete="off">
 				<li data-bind="text: title, click: $parent.populateInfoWindow"></li>
 			</ul>
+			<p style="margin-top: 20px; font-size: 20px;" id="textResponse"></p>
+			<p style="margin-top: 20px; font-size: 20px; color: red;" id="error"></p>
 		</div>
 
 		<!-- Google Maps -->
@@ -36,7 +38,7 @@
 	<script src="bower_components/knockout/dist/knockout.js" charset="utf-8"></script>
 	<script src="js/model.js"></script>
 	<script src="js/main.js"></script>
-	<script async defer src="https://maps.googleapis.com/maps/api/js?libraries=geometry,drawing&key=AIzaSyB13r-Y7MSv_xu31SelklOmZh-wfvh1zBU&callback=initialize">
+	<script async defer src="https://maps.googleapis.com/maps/api/js?libraries=geometry,drawing&key=AIzaSyB13r-Y7MSv_xu31SelklOmZh-wfvh1zBU&callback=initialize" onerror="googleMapsError()">
 	</script>
 
 	</body>

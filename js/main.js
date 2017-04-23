@@ -39,45 +39,43 @@ var ViewModel = function() {
         self.locations().forEach(function(location) {
             google.maps.event.addListener(location.marker(), 'click', function() {
                 self.populateInfoWindow(location);
-                // console.log(location.)
             });
-            // google.maps.event.addListener(location.marker(), 'closeclick', function() {
-            //     infoWindow.setMarker(null);
-            // });
         });
     };
 
     self.populateInfoWindow = function(marker) {
-        self.infoWindow = new google.maps.InfoWindow();
-        self.infoWindow.marker = marker;
-        // self.infoWindow.setContent('<div>' + marker.title() + '<p><a id="foursquare"></a></p></div>');
+        infoWindow = new google.maps.InfoWindow();
+        infoWindow.marker = marker;
+        infoWindow.setContent('<div>' + marker.title() + '</div><p id=#foursquare></p>');
         self.getFourSquare(marker.lat(), marker.lng());
-        // console.log()
-        // self.getFourSquare(marker.lat(), marker.lng());
-        self.infoWindow.open(map, marker.marker());
+        infoWindow.open(map, marker.marker());
 
         map.panTo(new google.maps.LatLng(marker.lat(), marker.lng()));
+        self.setAnimation(marker);
+    };
+
+    self.setAnimation = function(marker) {
+        marker.marker().setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function() {
+            marker.marker().setAnimation(null);
+        }, 750);
     };
 
     // Search
     // Filter list
     self.filteredLocations = ko.computed(function() {
         var filter = self.query().toLowerCase();
-        // console.log(filter);
 
-        if (!filter) {
+        if (filter === null) {
             return self.locations();
         } else {
             return ko.utils.arrayFilter(self.locations(), function(item) {
-                // return item.marker().setMap(map);
-                // item.marker().setVisible(false);
-                // return item.title().toLowerCase().indexOf(filter) !== -1;
-                // return item.marker().setMap(map);
                 if (item.title().toLowerCase().indexOf(filter) !== -1) {
+                    item.marker().setMap(map);
                     item.marker().setVisible(true);
-                    item.title().toLowerCase().indexOf(filter) !== -1
                     return true;
                 } else {
+                    item.marker().setMap(null);
                     item.marker().setVisible(false);
                     return false;
                 }
@@ -90,6 +88,7 @@ var ViewModel = function() {
         // var date = d.getFullYear().toString() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
         var date = '20170420'
         var clientId = 'XCPHQKTMT3N2NWZMWG2BCQ40GHHRD0LBBVZRU354ZVMEUZ25';
+        // var clientId = 'XCPHQKTMT3N2NWZMWG2BCQ40GHHRD0LBBVZRU354ZVMEUZ2';
         var clientSecret = 'ZC53KE1SVSTOSKR2FPQXIMSGEXC3BVCZTRGBGRUGZZWXLJHE';
         var url = 'https://api.foursquare.com/v2/venues/search?ll=' + loc1 + ',' + loc2 + '&client_id=' + clientId + '&client_secret=' + clientSecret + '&v=' + date;
 
@@ -100,14 +99,17 @@ var ViewModel = function() {
                 var four = results.response.venues[0].url;
                 if (!four) {
                     four = 'n/a';
-                    self.infoWindow.setContent(four);
+                    // $("#textResponse").html(four);
+                    alert(four);
                     return;
                 } else {
-                    self.infoWindow.setContent(four);
+                    // $("#textResponse").html(four);
+                    alert(four);
                     return;
                 }
-                // console.log(results.response.venues[0].name)
-                // self.infoWindow.setContent(four);
+            },
+            error: function(XMLHttpRequest, textResponse, errorThrown) {
+                $("#error").html("Bad Request");
             }
 
         }
@@ -139,6 +141,10 @@ var Location = function(data) {
     this.marker = ko.observable(marker);
     // bounds.extend(this.marker);
 };
+
+function googleMapsError() {
+    alert("Failed to load Google Maps.")
+}
 
 function initialize() {
 
