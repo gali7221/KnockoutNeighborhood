@@ -46,9 +46,9 @@ var ViewModel = function() {
     self.populateInfoWindow = function(marker) {
         infoWindow = new google.maps.InfoWindow();
         infoWindow.marker = marker;
-        infoWindow.setContent('<div>' + marker.title() + '</div><p id=#foursquare></p>');
-        self.getFourSquare(marker.lat(), marker.lng());
-        infoWindow.open(map, marker.marker());
+        infoWindow.setContent('<div>' + marker.title() + '<p id="four"></p></div>');
+        self.getFourSquare(marker.lat(), marker.lng(), marker.marker());
+        // infoWindow.open(map, marker.marker());
 
         map.panTo(new google.maps.LatLng(marker.lat(), marker.lng()));
         self.setAnimation(marker);
@@ -83,7 +83,7 @@ var ViewModel = function() {
         }
     });
 
-    self.getFourSquare = function(loc1, loc2) {
+    self.getFourSquare = function(loc1, loc2, marker) {
         var d = new Date();
         // var date = d.getFullYear().toString() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
         var date = '20170420'
@@ -97,15 +97,10 @@ var ViewModel = function() {
             url: url,
             success: function(results) {
                 var four = results.response.venues[0].url;
+                infoWindow.setContent('<a href="' + four + '">' + four + '</a>');
+                infoWindow.open(map, marker);
                 if (!four) {
-                    four = 'n/a';
-                    // $("#textResponse").html(four);
-                    alert(four);
-                    return;
-                } else {
-                    // $("#textResponse").html(four);
-                    alert(four);
-                    return;
+                    four = 'Company does not have a website!';
                 }
             },
             error: function(XMLHttpRequest, textResponse, errorThrown) {
