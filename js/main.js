@@ -11,11 +11,13 @@ var ViewModel = function() {
     self.locations = ko.observableArray([]);
     // perform live update
     self.query = ko.observable('');
+    self.ajaxError = ko.observable(false);
     // self.filterLocations = ko.observableArray([]);
 
 
     // Create the google map zoomed in on Denver
     self.initMap = function() {
+        infoWindow = new google.maps.InfoWindow();
         var mapCanvas = document.getElementById('google-map');
         var cenLatLng = new google.maps.LatLng(40.7413549, -73.9980244);
         var mapOptions = {
@@ -44,7 +46,6 @@ var ViewModel = function() {
     };
 
     self.populateInfoWindow = function(marker) {
-        infoWindow = new google.maps.InfoWindow();
         infoWindow.marker = marker;
         infoWindow.setContent('<div>' + marker.title() + '<p id="four"></p></div>');
         self.getFourSquare(marker.lat(), marker.lng(), marker.marker());
@@ -58,7 +59,7 @@ var ViewModel = function() {
         marker.marker().setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function() {
             marker.marker().setAnimation(null);
-        }, 750);
+        }, 1400);
     };
 
     // Search
@@ -86,7 +87,7 @@ var ViewModel = function() {
     self.getFourSquare = function(loc1, loc2, marker) {
         var d = new Date();
         // var date = d.getFullYear().toString() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
-        var date = '20170420'
+        var date = '20170420';
         var clientId = 'XCPHQKTMT3N2NWZMWG2BCQ40GHHRD0LBBVZRU354ZVMEUZ25';
         // var clientId = 'XCPHQKTMT3N2NWZMWG2BCQ40GHHRD0LBBVZRU354ZVMEUZ2';
         var clientSecret = 'ZC53KE1SVSTOSKR2FPQXIMSGEXC3BVCZTRGBGRUGZZWXLJHE';
@@ -96,21 +97,24 @@ var ViewModel = function() {
         var settings = {
             url: url,
             success: function(results) {
+                // self.ajaxError(false);
                 var four = results.response.venues[0].url;
-                infoWindow.setContent('<a href="' + four + '">' + four + '</a>');
-                infoWindow.open(map, marker);
                 if (!four) {
                     four = 'Company does not have a website!';
+                    infoWindow.setContent('<p>' + four + '</a>');
+                    infoWindow.open(map, marker);
+                } else {
+                    infoWindow.setContent('<a href="' + four + '">' + four + '</a>');
+                    infoWindow.open(map, marker);
                 }
             },
             error: function(XMLHttpRequest, textResponse, errorThrown) {
-                $("#error").html("Bad Request");
+                self.ajaxError(true);
             }
-
-        }
+        };
         $.ajax(settings);
-    }
-}
+    };
+};
 // Constructor to create Tribeca markers
 var Location = function(data) {
     'use strict';
@@ -134,15 +138,13 @@ var Location = function(data) {
 
     // Set the marker as a knockout observable
     this.marker = ko.observable(marker);
-    // bounds.extend(this.marker);
 };
 
 function googleMapsError() {
-    alert("Failed to load Google Maps.")
+    alert("Failed to load Google Maps.");
 }
 
 function initialize() {
-
     viewModel = new ViewModel();
 
     viewModel.initMap();

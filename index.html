@@ -24,10 +24,10 @@
 			<ul data-bind="foreach: filteredLocations" class="desktop-list" autocomplete="off">
 				<li data-bind="text: title, click: $parent.populateInfoWindow"></li>
 			</ul>
-			<p style="margin-top: 20px; font-size: 20px;" id="textResponse"></p>
-			<p style="margin-top: 20px; font-size: 20px; color: red;" id="error"></p>
+			<p id="error" data-bind='visible: ajaxError'>
+				There appears to be a bad request. The internet will resolve! Till then enjoy the bouncing markers
+			</p>
 		</div>
-		<div id></div>
 
 		<!-- Google Maps -->
 		<div class="col-md-9 map-container">
